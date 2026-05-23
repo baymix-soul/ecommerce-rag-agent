@@ -11,39 +11,26 @@
 
 ---
 
-## 当前阶段：Project Context and Rules Initialization
-
-### 上下文与规则填充
-
-- [x] [P0] 写入 AGENTS.md 项目总上下文
-- [x] [P0] 重写 .trae/rules/ 下 5 个规则文件
-- [x] [P0] 重写 .trae/commands/ 下 5 个命令 Prompt 模板
-- [x] [P0] 重写 .trae/memory/decisions.md（9 条技术决策）
-- [x] [P0] 重写 .trae/memory/changelog.md
-- [x] [P0] 补充 docs/ 下 5 个设计文档
-
----
-
-## 下一阶段：Backend MVP
+## 当前阶段：Backend MVP
 
 ### 基础搭建
 
 - [x] [P1] 确认后端构建工具为 Maven（已决策 D-009）
-- [ ] [P1] 初始化 Spring Boot 3 Maven 项目骨架
-- [ ] [P1] 创建配置类（环境变量读取 LLM Key、Embedding Key、向量库地址）
-- [ ] [P1] 实现健康检查 API（GET /health）
+- [x] [P1] 初始化 Spring Boot 3 Maven 项目骨架
+- [x] [P1] 创建配置类（环境变量读取 LLM Key、Embedding Key、向量库地址）
+- [x] [P1] 实现健康检查 API（GET /api/health）
 
 ### 商品数据
 
-- [ ] [P1] 设计并创建商品数据 JSON schema
-- [ ] [P1] 准备 50-100 条商品 mock 数据（resources/data/products.json）
-- [ ] [P1] 编写商品数据加载脚本（JsonLoader）
-- [ ] [P1] 实现 ProductService（商品查询、过滤）
+- [x] [P1] 设计并创建商品数据 JSON schema（12 字段标准 schema）
+- [x] [P1] 准备 100 条商品数据（老师数据集转换 → products.json）
+- [x] [P1] 编写商品数据加载服务（JsonLoader + ProductService）
+- [x] [P1] 实现商品查询与过滤 API（GET /api/products, GET /api/products/{id}, POST /api/products/search）
 
 ### RAG Pipeline
 
 - [ ] [P1] 封装 Embedding 接口（EmbeddingProvider）
-- [ ] [P1] 实现关键词检索（KeywordRetriever，MVP 第一阶段）
+- [ ] [P1] 实现关键词检索（KeywordRetriever，MVP 第一阶段）— ProductService 已实现基础关键词检索，后续需抽取为独立 Retriever
 - [ ] [P1] 预留 VectorStoreService 接口（后续接入 Qdrant）
 - [ ] [P1] 实现检索 API（VectorRetriever）
 

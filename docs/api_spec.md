@@ -1,19 +1,19 @@
 # API 接口规范
 
-> 规划文档，当前为设计阶段，尚未实现。
+> 已实现商品相关 API，对话/流式接口待后续阶段实现。
 
 ## 基础信息
 
-- **Base URL**: `http://localhost:8080/api/v1`
+- **Base URL**: `http://localhost:8080/api`
 - **Content-Type**: `application/json`
-- **流式接口**: `text/event-stream` (SSE)
+- **流式接口**: `text/event-stream` (SSE) — 待实现
 - **认证方式**: 暂不实现（后续阶段）
 
 ---
 
 ## 1. 健康检查
 
-### GET /health
+### GET /api/health
 
 返回服务运行状态。
 
@@ -21,106 +21,168 @@
 ```json
 {
   "status": "ok",
-  "version": "0.1.0",
-  "vector_db_connected": true,
-  "product_count": 100
+  "service": "ecommerce-rag-agent",
+  "version": "0.1.0"
 }
 ```
 
 ---
 
-## 2. 对话接口（核心）
+## 2. 商品列表
 
-### POST /api/v1/chat/stream
+### GET /api/products
 
-发送用户消息，SSE 流式获取 AI 导购回复。
+返回商品卡片列表。
 
-**Content-Type**: `application/json` → **Response**: `text/event-stream`
+**Query 参数**:
 
-**Request**:
+| 参数 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| limit | int | 否 | 20 | 返回数量，最大 100 |
+
+**Response (200)**:
 ```json
-{
-  "session_id": "uuid-string",
-  "message": "我想买一双适合跑步的鞋"
-}
+[
+  {
+    "product_id": "p_beauty_001",
+    "name": "雅诗兰黛特润修护肌活精华露...",
+    "price": 720.0,
+    "currency": "CNY",
+    "image_url": "/images/p_beauty_001.jpg",
+    "reason": ""
+  }
+]
 ```
 
-**SSE 事件流**:
-
+**curl 示例**:
+```bash
+curl http://localhost:8080/api/products?limit=5
 ```
-event: text
-data: {"delta": "为您找到几款适合跑步的鞋，为您推荐以下商品："}
 
-event: text
-data: {"delta": "\n\n1. **Nike Air Zoom Pegasus** - 轻量透气"}
-
-event: product_card
-data: {"product_id": "PROD-001", "name": "Nike Air Zoom Pegasus 40", "price": 899.00, "image_url": "https://...", "reason": "轻量缓震，适合日常跑步训练"}
-
-event: text
-data: {"delta": "\n2. **Adidas Ultraboost 23** ..."}
-
-event: product_card
-data: {"product_id": "PROD-005", "name": "Adidas Ultraboost 23", "price": 1099.00, "image_url": "https://...", "reason": "BOOST 科技中底，缓震优秀"}
-
-event: done
-data: {}
+**PowerShell 示例**:
+```powershell
+Invoke-RestMethod http://localhost:8080/api/products?limit=5
 ```
 
 ---
 
-## 3. 商品检索接口
+## 3. 商品详情
 
-### POST /api/v1/search
+### GET /api/products/{productId}
 
-按文本检索商品。
+根据 productId 返回商品完整信息。
 
-**Request**:
+**Path 参数**:
+
+| 参数 | 类型 | 说明 |
+|------|------|------|
+| productId | string | 商品 ID，如 p_beauty_001 |
+
+**Response (200)**:
 ```json
 {
-  "query": "白色连衣裙",
-  "filters": {
-    "category": "服装",
-    "price_min": 100.0,
-    "price_max": 500.0
+  "product_id": "p_beauty_001",
+  "name": "雅诗兰黛特润修护肌活精华露...",
+  "brand": "雅诗兰黛",
+  "category": "美妆护肤",
+  "sub_category": "精华",
+  "price": 720.0,
+  "price_range": "720~1260",
+  "image_url": "/images/p_beauty_001.jpg",
+  "description": "雅诗兰黛特润修护肌活精华露（小棕瓶）...",
+  "specs": {
+    "容量": "30ml 经典装、50ml 加大装、75ml 家用装"
   },
-  "top_k": 10
+  "avg_rating": 2.2,
+  "currency": "CNY"
+}
+```
+
+**Response (404)**:
+```json
+{
+  "code": "PRODUCT_NOT_FOUND",
+  "message": "Product not found: non_existent_id"
+}
+```
+
+**curl 示例**:
+```bash
+curl http://localhost:8080/api/products/p_beauty_001
+```
+
+**PowerShell 示例**:
+```powershell
+Invoke-RestMethod http://localhost:8080/api/products/p_beauty_001
+```
+
+---
+
+## 4. 商品搜索
+
+### POST /api/products/search
+
+按关键词和条件搜索商品。当前为关键词检索，后续会接入 Embedding + Qdrant 向量检索。
+
+**Request Body**:
+
+| 字段 | 类型 | 必填 | 默认值 | 说明 |
+|------|------|------|--------|------|
+| query | string | 否 | null | 搜索关键词，按空格分词匹配 |
+| category | string | 否 | null | 类目过滤（包含匹配） |
+| sub_category | string | 否 | null | 子类目过滤（包含匹配） |
+| brand | string | 否 | null | 品牌过滤（包含匹配） |
+| min_price | number | 否 | null | 最低价格 |
+| max_price | number | 否 | null | 最高价格 |
+| limit | int | 否 | 10 | 返回数量，最大 20 |
+
+**Request 示例**:
+```json
+{
+  "query": "油皮 洗面奶",
+  "category": "美妆护肤",
+  "max_price": 200,
+  "limit": 10
 }
 ```
 
 **Response (200)**:
 ```json
 {
-  "results": [
+  "query": "油皮 洗面奶",
+  "total": 3,
+  "products": [
     {
-      "product_id": "PROD-010",
-      "name": "纯白棉质连衣裙",
-      "price": 299.00,
-      "image_url": "https://...",
-      "score": 0.93
+      "product_id": "p_beauty_010",
+      "name": "...",
+      "price": 89.0,
+      "currency": "CNY",
+      "image_url": "/images/p_beauty_010.jpg",
+      "reason": ""
     }
-  ],
-  "total": 5
+  ]
 }
+```
+
+**curl 示例**:
+```bash
+curl -X POST http://localhost:8080/api/products/search \
+  -H "Content-Type: application/json" \
+  -d '{"query":"油皮 洗面奶","max_price":200}'
+```
+
+**PowerShell 示例**:
+```powershell
+Invoke-RestMethod -Method Post -Uri http://localhost:8080/api/products/search -ContentType "application/json" -Body '{"query":"油皮 洗面奶","max_price":200}'
 ```
 
 ---
 
-## 4. 商品管理接口（管理后台，后续阶段）
+## 5. 对话接口（核心）— 待实现
 
-### GET /api/v1/products
+### POST /api/chat/stream
 
-获取商品列表，支持分页。
-
-**Query Params**: `page=1&size=20&category=服装`
-
-### GET /api/v1/products/{productId}
-
-获取单个商品详情。
-
-### POST /api/v1/products/rebuild-index
-
-重建向量索引（仅管理员）。
+发送用户消息，SSE 流式获取 AI 导购回复。
 
 ---
 
@@ -128,21 +190,19 @@ data: {}
 
 ```json
 {
-  "error": {
-    "code": "INVALID_QUERY",
-    "message": "查询参数无效",
-    "timestamp": "2026-05-21T10:00:00Z"
-  }
+  "code": "ERROR_CODE",
+  "message": "错误描述"
 }
 ```
 
 **错误码**:
 
-| 码 | 含义 |
-|----|------|
-| INVALID_QUERY | 查询参数无效 |
-| SESSION_NOT_FOUND | 会话不存在 |
-| EMBEDDING_TIMEOUT | Embedding 服务超时 |
-| LLM_TIMEOUT | LLM 调用超时 |
-| VECTOR_DB_ERROR | 向量数据库异常 |
-| INTERNAL_ERROR | 服务器内部错误 |
+| 码 | HTTP 状态 | 含义 |
+|----|-----------|------|
+| PRODUCT_NOT_FOUND | 404 | 商品不存在 |
+| INVALID_QUERY | 400 | 查询参数无效（待实现） |
+| SESSION_NOT_FOUND | 400 | 会话不存在（待实现） |
+| EMBEDDING_TIMEOUT | 500 | Embedding 服务超时（待实现） |
+| LLM_TIMEOUT | 500 | LLM 调用超时（待实现） |
+| VECTOR_DB_ERROR | 500 | 向量数据库异常（待实现） |
+| INTERNAL_ERROR | 500 | 服务器内部错误 |

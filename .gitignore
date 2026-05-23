@@ -21,6 +21,7 @@ target/
 .DS_Store
 Thumbs.db
 desktop.ini
+NUL
 
 # 日志文件
 *.log
@@ -52,3 +53,10 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+
+# 原始数据集目录
+dataset_inbox/
+data_raw/
+
+# 压缩包
+*.zip
