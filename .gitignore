@@ -1,0 +1,54 @@
+# 环境变量
+.env
+.env.*
+!.env.example
+
+# Java (Maven)
+target/
+*.jar
+*.war
+
+# Gradle（如有）
+.gradle/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+logs/
+
+# 数据库文件
+*.db
+*.sqlite
+
+# 模型文件（不提交大文件）
+*.pt
+*.bin
+*.pkl
+model/
+
+# 密钥文件
+*.key
+*.pem
+secrets.json
+api_keys.json
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 测试覆盖率
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
