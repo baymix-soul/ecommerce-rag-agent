@@ -7,9 +7,23 @@
 target/
 *.jar
 *.war
+!gradle/wrapper/gradle-wrapper.jar
+!client/android/gradle/wrapper/gradle-wrapper.jar
 
-# Gradle（如有）
+# Gradle
 .gradle/
+
+# Android
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Android build
+client/android/build/
+client/android/app/build/
+client/android/.gradle/
 
 # IDE
 .vscode/

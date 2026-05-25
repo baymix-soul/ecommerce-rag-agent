@@ -8,6 +8,7 @@ public class AppProperties {
     private LlmProperties llm = new LlmProperties();
     private VectorProperties vector = new VectorProperties();
     private ProductProperties product = new ProductProperties();
+    private ChatProperties chat = new ChatProperties();
 
     public LlmProperties getLlm() {
         return llm;
@@ -33,13 +34,21 @@ public class AppProperties {
         this.product = product;
     }
 
+    public ChatProperties getChat() {
+        return chat;
+    }
+
+    public void setChat(ChatProperties chat) {
+        this.chat = chat;
+    }
+
     public static class LlmProperties {
-        private String baseUrl = "";
+        private String baseUrl = "https://ark.cn-beijing.volces.com/api/v3";
         private String apiKey = "";
-        private String model = "doubao-seed-2.0-lite";
+        private String model = "";
         private int maxTokens = 2048;
         private double temperature = 0.7;
-        private int timeoutSeconds = 60;
+        private int timeoutSeconds = 30;
 
         public String getBaseUrl() { return baseUrl; }
         public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
@@ -70,5 +79,15 @@ public class AppProperties {
 
         public String getDataPath() { return dataPath; }
         public void setDataPath(String dataPath) { this.dataPath = dataPath; }
+    }
+
+    public static class ChatProperties {
+        private boolean mockLlmEnabled = true;
+        private int defaultCandidateLimit = 5;
+
+        public boolean isMockLlmEnabled() { return mockLlmEnabled; }
+        public void setMockLlmEnabled(boolean mockLlmEnabled) { this.mockLlmEnabled = mockLlmEnabled; }
+        public int getDefaultCandidateLimit() { return defaultCandidateLimit; }
+        public void setDefaultCandidateLimit(int defaultCandidateLimit) { this.defaultCandidateLimit = defaultCandidateLimit; }
     }
 }

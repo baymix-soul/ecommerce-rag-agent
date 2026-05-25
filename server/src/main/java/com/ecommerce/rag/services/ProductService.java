@@ -129,11 +129,11 @@ public class ProductService {
 
     private int computeScore(Product product, String query) {
         String lowerQuery = query.toLowerCase();
-        String[] tokens = lowerQuery.split("\\s+");
+        List<String> searchTokens = extractSearchTokens(lowerQuery);
         int score = 0;
 
-        for (String token : tokens) {
-            if (token.isEmpty()) continue;
+        for (String token : searchTokens) {
+            if (token.isEmpty() || token.length() < 2) continue;
             if (product.getName() != null && product.getName().toLowerCase().contains(token)) {
                 score += 5;
             }
@@ -155,6 +155,26 @@ public class ProductService {
         }
 
         return score;
+    }
+
+    private List<String> extractSearchTokens(String query) {
+        String[] spaceTokens = query.split("\\s+");
+        Set<String> tokenSet = new HashSet<>();
+        for (String t : spaceTokens) {
+            if (!t.isEmpty()) tokenSet.add(t);
+        }
+        for (String t : spaceTokens) {
+            if (t.length() <= 4) continue;
+            boolean hasCjk = t.chars().anyMatch(c -> Character.UnicodeBlock.of(c) == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS);
+            if (hasCjk) {
+                for (int len = 2; len <= 4 && len <= t.length(); len++) {
+                    for (int i = 0; i + len <= t.length(); i++) {
+                        tokenSet.add(t.substring(i, i + len));
+                    }
+                }
+            }
+        }
+        return new ArrayList<>(tokenSet);
     }
 
     private boolean matchSpecs(Map<String, String> specs, String token) {
