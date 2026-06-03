@@ -38,6 +38,9 @@
 | specs | object | skus[].properties | 合并所有 SKU 属性，同属性多值用顿号拼接 |
 | avg_rating | number | user_reviews[].rating | 用户评分平均值，保留 1 位小数，无评价时 0.0 |
 | currency | string | 固定值 | "CNY" |
+| review_summary | string | user_reviews（脱敏聚合） | 用户评价摘要，可选，无评价时 null |
+| faq_summary | string | official_faq（Q&A拼接） | 常见问答摘要，可选，无 FAQ 时 null |
+| marketing_copy | string | marketing_description | 卖点文案，可选，无文案时 null |
 
 **标准 products.json 示例**:
 
@@ -85,6 +88,9 @@ public class Product {
     @JsonProperty("specs")        private Map<String, String> specs;
     @JsonProperty("avg_rating")   private Double avgRating;
     @JsonProperty("currency")     private String currency;
+    @JsonProperty("review_summary") private String reviewSummary;
+    @JsonProperty("faq_summary")    private String faqSummary;
+    @JsonProperty("marketing_copy") private String marketingCopy;
 }
 ```
 

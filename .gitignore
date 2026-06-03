@@ -3,6 +3,12 @@
 .env.*
 !.env.example
 
+# 生产环境变量（不提交）
+deploy/.env.production
+
+# Qdrant 本地存储
+qdrant_storage/
+
 # Java (Maven)
 target/
 *.jar
@@ -74,3 +80,11 @@ data_raw/
 
 # 压缩包
 *.zip
+
+# 构建产物输出
+compile_output.txt
+
+# 废弃测试目录
+wsl2test/
+wsl2test2/
+wsl2test3/

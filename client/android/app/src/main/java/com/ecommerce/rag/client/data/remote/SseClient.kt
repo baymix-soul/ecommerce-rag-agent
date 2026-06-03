@@ -2,8 +2,12 @@ package com.ecommerce.rag.client.data.remote
 
 import android.util.Log
 import com.ecommerce.rag.client.config.AppConfig
+import com.ecommerce.rag.client.data.model.PageContext
+import com.ecommerce.rag.client.data.model.PageType
 import com.ecommerce.rag.client.data.model.SseEvent
-import com.google.gson.Gson
+import com.google.gson.JsonArray
+import com.google.gson.JsonNull
+import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,19 +34,16 @@ class SseClient(
         }
         .build()
 
-    private val gson = Gson()
-
     suspend fun streamChat(
         message: String,
         limit: Int = AppConfig.DEFAULT_CANDIDATE_LIMIT,
+        pageContext: PageContext = PageContext.Empty,
         onEvent: (SseEvent) -> Unit,
         onError: (Throwable) -> Unit
     ) {
         withContext(Dispatchers.IO) {
             try {
-                val requestJson = gson.toJson(
-                    mapOf("message" to message, "limit" to limit)
-                )
+                val requestJson = buildRequestJson(message, limit, pageContext)
                 val request = Request.Builder()
                     .url("$baseUrl${AppConfig.CHAT_STREAM_PATH}")
                     .post(requestJson.toRequestBody("application/json".toMediaType()))
@@ -137,6 +138,54 @@ class SseClient(
             Log.w(TAG, "Failed to parse SSE event: type=$eventType, data=$data", e)
             SseEvent.Unknown
         }
+    }
+
+    /**
+     * 手动用 JsonObject 构造请求体，确保字段都是 snake_case，
+     * 不依赖 Gson 反射 / 不强制改 PageContext 的 Kotlin 字段名。
+     */
+    private fun buildRequestJson(
+        message: String,
+        limit: Int,
+        pageContext: PageContext
+    ): String {
+        val root = JsonObject().apply {
+            addProperty("message", message)
+            addProperty("limit", limit)
+            add("page_context", pageContextToJson(pageContext))
+        }
+        return root.toString()
+    }
+
+    private fun pageContextToJson(ctx: PageContext): JsonObject = JsonObject().apply {
+        addProperty("page_type", ctx.pageType.toWireName())
+        if (ctx.currentProductId != null) {
+            addProperty("current_product_id", ctx.currentProductId)
+        } else {
+            add("current_product_id", JsonNull.INSTANCE)
+        }
+        add("visible_product_ids", JsonArray().apply {
+            ctx.visibleProductIds.forEach { add(it) }
+        })
+        if (ctx.searchQuery != null) {
+            addProperty("search_query", ctx.searchQuery)
+        } else {
+            add("search_query", JsonNull.INSTANCE)
+        }
+        add("selected_filters", JsonObject().apply {
+            ctx.selectedFilters.forEach { (k, v) -> addProperty(k, v) }
+        })
+        add("recently_viewed_product_ids", JsonArray().apply {
+            ctx.recentlyViewedProductIds.forEach { add(it) }
+        })
+    }
+
+    private fun PageType.toWireName(): String = when (this) {
+        PageType.UNKNOWN -> "UNKNOWN"
+        PageType.PRODUCT_LIST -> "PRODUCT_LIST"
+        PageType.PRODUCT_DETAIL -> "PRODUCT_DETAIL"
+        PageType.SEARCH_RESULT -> "SEARCH_RESULT"
+        PageType.CHAT -> "CHAT"
     }
 
     companion object {

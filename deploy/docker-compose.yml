@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  qdrant:
+    image: qdrant/qdrant
+    container_name: ecommerce-qdrant
+    restart: unless-stopped
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  backend:
+    build: ../server
+    container_name: ecommerce-backend
+    restart: unless-stopped
+    depends_on:
+      qdrant:
+        condition: service_healthy
+    env_file:
+      - .env.production
+    expose:
+      - "8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+volumes:
+  qdrant_storage:

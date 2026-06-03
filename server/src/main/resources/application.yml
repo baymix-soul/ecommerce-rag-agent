@@ -15,9 +15,53 @@ app:
     timeout-seconds: ${LLM_TIMEOUT_SECONDS:30}
   vector:
     enabled: ${VECTOR_ENABLED:false}
-    qdrant-url: ${QDRANT_URL:http://localhost:6333}
+    store: ${VECTOR_STORE:in-memory}
+    qdrant:
+      url: ${QDRANT_URL:http://localhost:6333}
+      api-key: ${QDRANT_API_KEY:}
+      collection-name: ${QDRANT_COLLECTION:ecommerce_rag_chunks_mock}
+      vector-size: ${QDRANT_VECTOR_SIZE:64}
+      distance: ${QDRANT_DISTANCE:Cosine}
+      recreate-on-start: ${QDRANT_RECREATE_ON_START:false}
+      timeout-seconds: ${QDRANT_TIMEOUT_SECONDS:10}
   product:
     data-path: classpath:data/products.json
   chat:
     mock-llm-enabled: ${MOCK_LLM_ENABLED:true}
     default-candidate-limit: 5
+  embedding:
+    provider: ${EMBEDDING_PROVIDER:mock}
+    mock-dimension: 64
+    base-url: ${EMBEDDING_BASE_URL:}
+    api-key: ${EMBEDDING_API_KEY:}
+    model: ${EMBEDDING_MODEL:}
+    dimension: ${EMBEDDING_DIMENSION:64}
+    timeout-seconds: ${EMBEDDING_TIMEOUT_SECONDS:30}
+    batch-size: ${EMBEDDING_BATCH_SIZE:16}
+    ark-multimodal-path: ${ARK_MULTIMODAL_EMBEDDING_PATH:/embeddings/multimodal}
+  retrieval:
+    mode: hybrid
+    vector-enabled: true
+    keyword-enabled: true
+    auto-fallback-to-keyword: true
+    default-candidate-limit: 5
+  rewrite:
+    enabled: ${QUERY_REWRITE_ENABLED:false}
+    provider: ${QUERY_REWRITE_PROVIDER:lexicon}
+    max-variants: ${QUERY_REWRITE_MAX_VARIANTS:3}
+    max-soft-keywords: ${QUERY_REWRITE_MAX_SOFT_KEYWORDS:8}
+    timeout-seconds: ${QUERY_REWRITE_TIMEOUT_SECONDS:10}
+    cache-enabled: ${QUERY_REWRITE_CACHE_ENABLED:true}
+  understanding:
+    planner:
+      enabled: ${QUERY_PLANNER_ENABLED:false}
+      mode: ${QUERY_PLANNER_MODE:shadow}
+      timeout-seconds: ${QUERY_PLANNER_TIMEOUT_SECONDS:10}
+      max-taxonomy-items: ${QUERY_PLANNER_MAX_TAXONOMY_ITEMS:80}
+      include-brands: ${QUERY_PLANNER_INCLUDE_BRANDS:true}
+      cache-enabled: ${QUERY_PLANNER_CACHE_ENABLED:true}
+      min-confidence: ${QUERY_PLANNER_MIN_CONFIDENCE:0.85}
+      allow-takeover-intents: ${QUERY_PLANNER_ALLOW_TAKEOVER_INTENTS:PRODUCT_SEARCH,REFINE_PREVIOUS_QUERY,NEGATIVE_CONSTRAINT,CHANGE_OR_MORE,CURRENT_PRODUCT_QA}
+      fallback-on-warnings: ${QUERY_PLANNER_FALLBACK_ON_WARNINGS:true}
+      fallback-on-unknown-category: ${QUERY_PLANNER_FALLBACK_ON_UNKNOWN_CATEGORY:true}
+      fallback-on-unknown-sub-category: ${QUERY_PLANNER_FALLBACK_ON_UNKNOWN_SUB_CATEGORY:true}

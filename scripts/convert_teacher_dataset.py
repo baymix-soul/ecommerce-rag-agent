@@ -75,6 +75,61 @@ def merge_specs(skus: list) -> dict:
     return result
 
 
+def build_review_summary(reviews: list) -> str | None:
+    if not reviews:
+        return None
+    contents = []
+    for r in reviews:
+        content = r.get("content", "")
+        if content and isinstance(content, str) and content.strip():
+            contents.append(content.strip())
+        if len(contents) >= 5:
+            break
+    if not contents:
+        return None
+    summary_parts = []
+    rating_values = [r.get("rating", 0) for r in reviews[:5] if r.get("rating") is not None]
+    if rating_values:
+        avg = round(sum(rating_values) / len(rating_values), 1)
+        summary_parts.append(f"整体评分约{avg}分")
+    if contents:
+        feedback_parts = []
+        for i, c in enumerate(contents):
+            if len(c) > 80:
+                c = c[:80] + "..."
+            feedback_parts.append(f"{i + 1}）{c}")
+        summary_parts.append("代表性反馈：" + "；".join(feedback_parts))
+    text = "用户评价摘要：" + "，".join(summary_parts)
+    if len(text) > 500:
+        text = text[:497] + "..."
+    return text
+
+
+def build_faq_summary(faq_list: list) -> str | None:
+    if not faq_list:
+        return None
+    qa_pairs = []
+    for faq in faq_list:
+        q = faq.get("question", "")
+        a = faq.get("answer", "")
+        if q and a and isinstance(q, str) and isinstance(a, str):
+            q = q.strip()
+            a = a.strip()
+            if len(q) > 100:
+                q = q[:100] + "..."
+            if len(a) > 150:
+                a = a[:150] + "..."
+            qa_pairs.append(f"Q: {q} A: {a}")
+        if len(qa_pairs) >= 5:
+            break
+    if not qa_pairs:
+        return None
+    text = "常见问答：" + "；".join(qa_pairs)
+    if len(text) > 800:
+        text = text[:797] + "..."
+    return text
+
+
 def compute_avg_rating(reviews: list) -> float:
     if not reviews:
         return 0.0
@@ -175,6 +230,9 @@ def convert_dataset(input_dir: str, output_path: str, images_output_dir: str):
                 "specs": merge_specs(skus),
                 "avg_rating": compute_avg_rating(reviews),
                 "currency": "CNY",
+                "review_summary": build_review_summary(reviews),
+                "faq_summary": build_faq_summary(rag.get("official_faq", [])),
+                "marketing_copy": rag.get("marketing_description", "") or None,
             }
 
             warnings = validate_product(product, len(products) + 1)
@@ -202,6 +260,9 @@ def convert_dataset(input_dir: str, output_path: str, images_output_dir: str):
     print(f"\n=== Conversion Summary ===")
     print(f"Total products converted: {len(products)}")
     print(f"Total images copied: {image_count}")
+    print(f"With review_summary: {sum(1 for p in products if p.get('review_summary'))}")
+    print(f"With faq_summary: {sum(1 for p in products if p.get('faq_summary'))}")
+    print(f"With marketing_copy: {sum(1 for p in products if p.get('marketing_copy'))}")
     print(f"Output JSON: {output_file}")
     print(f"Output images: {images_out}")
 

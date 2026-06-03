@@ -12,10 +12,10 @@ public class MockLlmClient implements LlmClient {
     private static final Logger log = LoggerFactory.getLogger(MockLlmClient.class);
 
     private static final String HAS_CANDIDATES_RESPONSE =
-            "我根据你的需求，从商品库中找到了几款相关商品。下面这些商品与需求匹配度较高，你可以优先看看。";
+            "给你筛到几款匹配商品，可以优先看下面卡片。";
 
     private static final String NO_CANDIDATES_RESPONSE =
-            "当前商品库中暂未找到完全匹配的商品，你可以换个关键词或放宽条件再试试。";
+            "当前商品库中暂未找到满足条件的商品，可以放宽条件再试试。";
 
     private final AppProperties appProperties;
 

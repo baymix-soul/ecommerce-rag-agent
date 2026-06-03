@@ -13,6 +13,9 @@ public class ChatRequest {
     @JsonProperty("limit")
     private Integer limit;
 
+    @JsonProperty("page_context")
+    private PageContext pageContext;
+
     public String getMessage() {
         return message;
     }
@@ -42,5 +45,13 @@ public class ChatRequest {
             return 5;
         }
         return Math.min(limit, 10);
+    }
+
+    public PageContext getPageContext() {
+        return pageContext;
+    }
+
+    public void setPageContext(PageContext pageContext) {
+        this.pageContext = pageContext;
     }
 }

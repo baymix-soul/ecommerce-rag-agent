@@ -37,7 +37,7 @@ class MockLlmClientTest {
         assertFalse(chunks.isEmpty());
 
         String fullText = String.join("", chunks);
-        assertTrue(fullText.contains("商品库中找到了几款相关商品"));
+        assertTrue(fullText.contains("匹配商品"));
     }
 
     @Test
@@ -59,7 +59,7 @@ class MockLlmClientTest {
         assertFalse(chunks.isEmpty());
 
         String fullText = String.join("", chunks);
-        assertTrue(fullText.contains("暂未找到完全匹配"));
+        assertTrue(fullText.contains("暂未找到"));
     }
 
     @Test

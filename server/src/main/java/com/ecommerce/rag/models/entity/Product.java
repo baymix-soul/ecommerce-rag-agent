@@ -44,6 +44,15 @@ public class Product {
     @JsonProperty("currency")
     private String currency;
 
+    @JsonProperty("review_summary")
+    private String reviewSummary;
+
+    @JsonProperty("faq_summary")
+    private String faqSummary;
+
+    @JsonProperty("marketing_copy")
+    private String marketingCopy;
+
     public Product() {
         this.specs = Collections.emptyMap();
     }
@@ -142,5 +151,29 @@ public class Product {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getReviewSummary() {
+        return reviewSummary;
+    }
+
+    public void setReviewSummary(String reviewSummary) {
+        this.reviewSummary = reviewSummary;
+    }
+
+    public String getFaqSummary() {
+        return faqSummary;
+    }
+
+    public void setFaqSummary(String faqSummary) {
+        this.faqSummary = faqSummary;
+    }
+
+    public String getMarketingCopy() {
+        return marketingCopy;
+    }
+
+    public void setMarketingCopy(String marketingCopy) {
+        this.marketingCopy = marketingCopy;
     }
 }
