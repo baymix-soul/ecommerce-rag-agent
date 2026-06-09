@@ -1,0 +1,19 @@
+package com.ecommerce.rag.rag.router;
+
+public enum RetrievalIntent {
+    SMALLTALK,
+    HELP,
+    THANKS,
+    PRODUCT_SEARCH,
+    REFINE_PREVIOUS_QUERY,
+    NEGATIVE_CONSTRAINT,
+    CHANGE_OR_MORE,
+    COMPARE_PRODUCTS,
+    ADD_TO_CART,
+    VIEW_CART,
+    REMOVE_FROM_CART,
+    CART_SUMMARY,
+    CART_TOP_UP,
+    CART_COMPLETION_RECOMMEND,
+    UNKNOWN
+}

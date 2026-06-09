@@ -1,0 +1,311 @@
+[
+  {
+    "query": "推荐一款适合油皮的洗面奶",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "洁面",
+    "expected_keywords": ["油皮", "控油", "清洁", "洗面"],
+    "min_relevant_count": 1,
+    "notes": "希望召回洁面/洗面奶相关商品"
+  },
+  {
+    "query": "保湿面霜推荐",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "面霜",
+    "expected_keywords": ["保湿", "面霜", "滋润"],
+    "min_relevant_count": 1,
+    "notes": "基础保湿需求"
+  },
+  {
+    "query": "防晒霜哪个好",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "防晒",
+    "expected_keywords": ["防晒", "紫外线", "隔离"],
+    "min_relevant_count": 1,
+    "notes": "防晒品类召回"
+  },
+  {
+    "query": "适合敏感肌的护肤品",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["敏感肌", "温和", "舒缓", "修复"],
+    "min_relevant_count": 1,
+    "notes": "不限制子类目，测试跨子类目召回"
+  },
+  {
+    "query": "200元以下蓝牙耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "耳机",
+    "expected_keywords": ["蓝牙", "耳机", "无线"],
+    "max_price": 200,
+    "min_relevant_count": 1,
+    "notes": "价格约束 + 类目召回"
+  },
+  {
+    "query": "拍照效果好的手机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "手机",
+    "expected_keywords": ["拍照", "摄像", "像素", "手机"],
+    "min_relevant_count": 1,
+    "notes": "功能需求召回"
+  },
+  {
+    "query": "续航好的手机推荐",
+    "expected_category": "数码电子",
+    "expected_sub_category": "手机",
+    "expected_keywords": ["续航", "电池", "手机"],
+    "min_relevant_count": 1,
+    "notes": "纯向量语义召回测试"
+  },
+  {
+    "query": "轻便的无线耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "耳机",
+    "expected_keywords": ["轻便", "无线", "耳机", "蓝牙"],
+    "min_relevant_count": 1,
+    "notes": "语义+品类组合"
+  },
+  {
+    "query": "500元以内跑鞋",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑鞋",
+    "expected_keywords": ["跑鞋", "运动", "跑步"],
+    "max_price": 500,
+    "min_relevant_count": 1,
+    "notes": "价格约束判断"
+  },
+  {
+    "query": "轻量跑鞋推荐",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑鞋",
+    "expected_keywords": ["轻量", "跑鞋", "透气"],
+    "min_relevant_count": 1,
+    "notes": "语义+品类组合"
+  },
+  {
+    "query": "通勤用的双肩包",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "背包",
+    "expected_keywords": ["通勤", "双肩包", "背包", "大容量"],
+    "min_relevant_count": 1,
+    "notes": "场景化需求召回"
+  },
+  {
+    "query": "运动上衣",
+    "expected_category": "服饰运动",
+    "expected_sub_categories": ["短袖T恤", "速干T恤", "卫衣"],
+    "expected_keywords": ["运动", "上衣", "速干", "训练"],
+    "min_relevant_count": 1,
+    "notes": "实际子类目为短袖T恤/速干T恤/卫衣，非运动服"
+  },
+  {
+    "query": "好吃的零食",
+    "expected_category": "食品饮料",
+    "expected_sub_category": "零食",
+    "expected_keywords": ["零食", "小吃", "休闲", "食品"],
+    "min_relevant_count": 1,
+    "notes": "类目已修正为食品饮料"
+  },
+  {
+    "query": "有什么好喝的饮料",
+    "expected_category": "食品饮料",
+    "expected_sub_categories": ["茶饮", "咖啡", "牛奶", "酸奶", "碳酸饮料", "功能饮料"],
+    "expected_keywords": ["饮料", "饮品", "好喝"],
+    "min_relevant_count": 1,
+    "notes": "类目已修正为食品饮料，子类目多值匹配"
+  },
+  {
+    "query": "送礼用的食品礼盒",
+    "expected_category": "食品饮料",
+    "expected_sub_category": "零食",
+    "expected_keywords": ["送礼", "礼盒", "食品", "礼品"],
+    "min_relevant_count": 1,
+    "notes": "类目已修正为食品饮料"
+  },
+  {
+    "query": "日常生活用品",
+    "supported": false,
+    "unsupported_reason": "当前商品库暂无日用品/家清/纸品清洁类目",
+    "expected_category": "食品饮料",
+    "notes": "用于测试无商品覆盖场景，不计入pass_rate"
+  },
+  {
+    "query": "不太贵的跑鞋",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑鞋",
+    "expected_keywords": ["跑鞋", "运动"],
+    "max_price": 1000,
+    "min_relevant_count": 3,
+    "notes": "弱价格约束，max_price=1000"
+  },
+  {
+    "query": "不要日系品牌的护肤品",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["护肤"],
+    "negative_keywords": ["日本", "日系", "资生堂", "SK-II", "雪肌精"],
+    "min_relevant_count": 1,
+    "notes": "负向关键词排除，期望不返回日系品牌"
+  },
+  {
+    "query": "适合学生党的耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "耳机",
+    "expected_keywords": ["学生", "性价比", "便宜", "耳机"],
+    "min_relevant_count": 1,
+    "notes": "用户画像约束，期望召回价格较低的商品"
+  },
+  {
+    "query": "适合通勤的大容量背包",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "背包",
+    "expected_keywords": ["通勤", "大容量", "背包", "双肩"],
+    "min_relevant_count": 1,
+    "notes": "多约束组合：通勤+大容量+背包"
+  },
+  {
+    "query": "这款跑鞋用户反馈怎么样",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑鞋",
+    "expected_keywords": ["用户", "反馈", "评价", "跑鞋"],
+    "min_relevant_count": 1,
+    "notes": "评价类查询，期望命中 REVIEW_SUMMARY chunk"
+  },
+  {
+    "query": "耳机戴久了舒服吗",
+    "expected_category": "数码电子",
+    "expected_sub_category": "耳机",
+    "expected_keywords": ["舒服", "佩戴", "久"],
+    "min_relevant_count": 1,
+    "notes": "佩戴体验类查询，期望命中评价或FAQ"
+  },
+  {
+    "query": "背包能装电脑吗",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "背包",
+    "expected_keywords": ["装", "电脑", "容量"],
+    "min_relevant_count": 1,
+    "notes": "FAQ类查询，期望命中FAQ chunk"
+  },
+  {
+    "query": "洗面奶洗完紧绷吗",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "洁面",
+    "expected_keywords": ["紧绷", "洗面奶", "洗完"],
+    "min_relevant_count": 1,
+    "notes": "使用体验类查询，期望命中评价或FAQ"
+  },
+  {
+    "query": "防晒适合敏感肌吗",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "防晒",
+    "expected_keywords": ["敏感肌", "防晒", "适合"],
+    "min_relevant_count": 1,
+    "notes": "适用人群查询，期望命中评价或FAQ"
+  },
+  {
+    "query": "这款商品真实评价怎么样",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["评价", "真实", "反馈"],
+    "min_relevant_count": 1,
+    "notes": "评价类跨子类目查询"
+  },
+  {
+    "query": "有什么常见问题",
+    "expected_category": "数码电子",
+    "expected_sub_category": "耳机",
+    "expected_keywords": ["常见问题", "FAQ"],
+    "min_relevant_count": 1,
+    "notes": "FAQ类查询"
+  },
+  {
+    "query": "这款产品主要卖点是什么",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "面膜",
+    "expected_keywords": ["卖点", "亮点", "优势"],
+    "min_relevant_count": 1,
+    "notes": "卖点类查询，期望命中MARKETING_COPY chunk"
+  },
+  {
+    "query": "适合送礼吗",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["送礼", "礼物", "礼盒"],
+    "min_relevant_count": 1,
+    "notes": "场景化查询，期望命中DESCRIPTION或MARKETING_COPY"
+  },
+  {
+    "query": "学生党耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "真无线耳机",
+    "expected_keywords": ["耳机", "性价比", "低价"],
+    "min_relevant_count": 1,
+    "notes": "软语义：学生党→性价比、低价、实用"
+  },
+  {
+    "query": "通勤双肩包",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "背包",
+    "expected_keywords": ["通勤", "双肩包", "背包"],
+    "min_relevant_count": 1,
+    "notes": "软语义：通勤→轻便、大容量、电脑仓"
+  },
+  {
+    "query": "夏天不闷的跑鞋",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑步鞋",
+    "expected_keywords": ["透气", "跑鞋", "轻量"],
+    "min_relevant_count": 1,
+    "notes": "软语义：夏天不闷→透气、清爽、轻量"
+  },
+  {
+    "query": "送礼用的护肤品",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["送礼", "护肤", "礼盒"],
+    "min_relevant_count": 1,
+    "notes": "软语义：送礼→礼盒、包装、品牌感"
+  },
+  {
+    "query": "跑步新手适合什么鞋",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "跑步鞋",
+    "expected_keywords": ["跑步", "新手", "入门"],
+    "min_relevant_count": 1,
+    "notes": "软语义：跑步新手→缓震、稳定、舒适"
+  },
+  {
+    "query": "戴久舒服的耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "真无线耳机",
+    "expected_keywords": ["耳机", "舒服", "佩戴"],
+    "min_relevant_count": 1,
+    "notes": "软语义：戴久→佩戴舒适、轻量、不压耳"
+  },
+  {
+    "query": "熬夜脸暗沉用什么",
+    "expected_category": "美妆护肤",
+    "expected_keywords": ["熬夜", "暗沉", "提亮", "修护"],
+    "min_relevant_count": 1,
+    "notes": "软语义：熬夜暗沉→提亮、修护、抗氧化"
+  },
+  {
+    "query": "性价比高的耳机",
+    "expected_category": "数码电子",
+    "expected_sub_category": "真无线耳机",
+    "expected_keywords": ["性价比", "实惠", "耳机"],
+    "min_relevant_count": 1,
+    "notes": "明确性价比需求"
+  },
+  {
+    "query": "上班背电脑的包",
+    "expected_category": "服饰运动",
+    "expected_sub_category": "背包",
+    "expected_keywords": ["电脑", "背包", "通勤"],
+    "min_relevant_count": 1,
+    "notes": "软语义：背电脑→电脑仓、大容量、防震"
+  },
+  {
+    "query": "洗完不紧绷的洗面奶",
+    "expected_category": "美妆护肤",
+    "expected_sub_category": "洁面",
+    "expected_keywords": ["洗面奶", "紧绷", "温和"],
+    "min_relevant_count": 1,
+    "notes": "软语义：紧绷→温和、不紧绷、保湿"
+  }
+]

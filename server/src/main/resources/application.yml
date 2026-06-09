@@ -1,0 +1,102 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ecommerce-rag-agent
+
+app:
+  llm:
+    base-url: "${LLM_BASE_URL:https://ark.cn-beijing.volces.com/api/v3}"
+    api-key: "${LLM_API_KEY:}"
+    model: "${LLM_MODEL:}"
+    max-tokens: ${LLM_MAX_TOKENS:2048}
+    temperature: ${LLM_TEMPERATURE:0.7}
+    timeout-seconds: ${LLM_TIMEOUT_SECONDS:30}
+  vector:
+    enabled: ${VECTOR_ENABLED:false}
+    store: ${VECTOR_STORE:in-memory}
+    qdrant:
+      url: ${QDRANT_URL:http://localhost:6333}
+      api-key: ${QDRANT_API_KEY:}
+      collection-name: ${QDRANT_COLLECTION:ecommerce_rag_chunks_mock}
+      vector-size: ${QDRANT_VECTOR_SIZE:64}
+      distance: ${QDRANT_DISTANCE:Cosine}
+      recreate-on-start: ${QDRANT_RECREATE_ON_START:false}
+      timeout-seconds: ${QDRANT_TIMEOUT_SECONDS:10}
+  product:
+    data-path: classpath:data/products.json
+  chat:
+    mock-llm-enabled: ${MOCK_LLM_ENABLED:true}
+    default-candidate-limit: 5
+  embedding:
+    provider: ${EMBEDDING_PROVIDER:mock}
+    mock-dimension: 64
+    base-url: ${EMBEDDING_BASE_URL:}
+    api-key: ${EMBEDDING_API_KEY:}
+    model: ${EMBEDDING_MODEL:}
+    dimension: ${EMBEDDING_DIMENSION:64}
+    timeout-seconds: ${EMBEDDING_TIMEOUT_SECONDS:30}
+    batch-size: ${EMBEDDING_BATCH_SIZE:16}
+    ark-multimodal-path: ${ARK_MULTIMODAL_EMBEDDING_PATH:/embeddings/multimodal}
+  retrieval:
+    mode: hybrid
+    vector-enabled: true
+    keyword-enabled: true
+    auto-fallback-to-keyword: true
+    default-candidate-limit: 5
+  rewrite:
+    enabled: ${QUERY_REWRITE_ENABLED:false}
+    provider: ${QUERY_REWRITE_PROVIDER:lexicon}
+    max-variants: ${QUERY_REWRITE_MAX_VARIANTS:3}
+    max-soft-keywords: ${QUERY_REWRITE_MAX_SOFT_KEYWORDS:8}
+    timeout-seconds: ${QUERY_REWRITE_TIMEOUT_SECONDS:10}
+    cache-enabled: ${QUERY_REWRITE_CACHE_ENABLED:true}
+  understanding:
+    planner:
+      enabled: ${QUERY_PLANNER_ENABLED:false}
+      mode: ${QUERY_PLANNER_MODE:shadow}
+      timeout-seconds: ${QUERY_PLANNER_TIMEOUT_SECONDS:10}
+      max-taxonomy-items: ${QUERY_PLANNER_MAX_TAXONOMY_ITEMS:80}
+      include-brands: ${QUERY_PLANNER_INCLUDE_BRANDS:true}
+      cache-enabled: ${QUERY_PLANNER_CACHE_ENABLED:true}
+      min-confidence: ${QUERY_PLANNER_MIN_CONFIDENCE:0.85}
+      allow-takeover-intents: ${QUERY_PLANNER_ALLOW_TAKEOVER_INTENTS:PRODUCT_SEARCH,REFINE_PREVIOUS_QUERY,NEGATIVE_CONSTRAINT,CHANGE_OR_MORE,CURRENT_PRODUCT_QA}
+      fallback-on-warnings: ${QUERY_PLANNER_FALLBACK_ON_WARNINGS:true}
+      fallback-on-unknown-category: ${QUERY_PLANNER_FALLBACK_ON_UNKNOWN_CATEGORY:true}
+      fallback-on-unknown-sub-category: ${QUERY_PLANNER_FALLBACK_ON_UNKNOWN_SUB_CATEGORY:true}
+  redis:
+    enabled: ${REDIS_ENABLED:true}
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: ${REDIS_DATABASE:0}
+  auth:
+    demo-username: ${DEMO_USERNAME:demo}
+    demo-password: ${DEMO_PASSWORD:demo123}
+    token-ttl-seconds: ${AUTH_TOKEN_TTL_SECONDS:604800}
+  cart:
+    top-up-tolerance: ${CART_TOP_UP_TOLERANCE:100}
+  tts:
+    enabled: ${TTS_ENABLED:true}
+    provider: ${TTS_PROVIDER:edge-tts-cli}
+    audio-dir: ${TTS_AUDIO_DIR:./data/tts}
+    public-base-url: ${TTS_PUBLIC_BASE_URL:}
+    max-text-length: ${TTS_MAX_TEXT_LENGTH:500}
+    default-voice: ${TTS_DEFAULT_VOICE:zh-CN-XiaoxiaoNeural}
+    allowed-voices:
+      - zh-CN-XiaoxiaoNeural
+      - zh-CN-YunxiNeural
+      - zh-CN-XiaoyiNeural
+      - zh-CN-YunjianNeural
+    default-format: ${TTS_DEFAULT_FORMAT:mp3}
+    cleanup-max-age-hours: ${TTS_CLEANUP_MAX_AGE_HOURS:24}
+    command-timeout-seconds: ${TTS_COMMAND_TIMEOUT_SECONDS:30}
+  perf:
+    enabled: ${PERF_TRACE_ENABLED:true}
+    log-enabled: ${PERF_TRACE_LOG_ENABLED:true}
+    recent-enabled: ${PERF_TRACE_RECENT_ENABLED:true}
+    recent-size: ${PERF_TRACE_RECENT_SIZE:100}
+    slow-threshold-ms: ${PERF_SLOW_THRESHOLD_MS:3000}
+    log-query-preview: ${PERF_LOG_QUERY_PREVIEW:true}
+    query-preview-length: ${PERF_QUERY_PREVIEW_LENGTH:40}

@@ -1,0 +1,95 @@
+# 环境变量（所有 .env 文件，但保留示例模板）
+.env
+deploy/.env
+deploy/.env.production
+
+# Qdrant 本地存储
+qdrant_storage/
+
+# Redis 数据（如果本地运行）
+redis_data/
+
+# TTS 音频缓存
+server/data/tts/
+data/tts/
+*.mp3
+
+# Java (Maven)
+target/
+*.jar
+*.war
+!gradle/wrapper/gradle-wrapper.jar
+!client/android/gradle/wrapper/gradle-wrapper.jar
+
+# Gradle
+.gradle/
+
+# Android
+local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Android build
+client/android/build/
+client/android/app/build/
+client/android/.gradle/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+NUL
+
+# 日志文件
+*.log
+logs/
+
+# 数据库文件
+*.db
+*.sqlite
+
+# 模型文件（不提交大文件）
+*.pt
+*.bin
+*.pkl
+model/
+
+# 密钥文件
+*.key
+*.pem
+secrets.json
+api_keys.json
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 测试覆盖率
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+
+# 原始数据集目录
+dataset_inbox/
+data_raw/
+
+# 压缩包
+*.zip
+
+# 构建产物输出
+compile_output.txt
+
+# 废弃测试目录
+wsl2test/
+wsl2test2/
+wsl2test3/
