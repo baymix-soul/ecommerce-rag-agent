@@ -31,6 +31,7 @@ import com.ecommerce.rag.rag.retriever.HybridCandidateRetriever;
 import com.ecommerce.rag.rag.retriever.NoMatchRecoveryResult;
 import com.ecommerce.rag.rag.retriever.NoMatchRecoveryService;
 import com.ecommerce.rag.rag.retriever.RetrievedProductCandidate;
+import com.ecommerce.rag.rag.retriever.ProductCardSafetyFilter;
 import com.ecommerce.rag.rag.retriever.StrictProductConstraintFilter;
 import com.ecommerce.rag.rag.router.RetrievalIntent;
 import com.ecommerce.rag.rag.router.RetrievalRouteResult;
@@ -60,6 +61,7 @@ class ChatServiceContextNoMatchRecoveryTest {
     private CartTopUpRecommendationService cartTopUpRecommendationService;
     private PerformanceTraceService perfService;
     private NoMatchRecoveryService noMatchRecoveryService;
+    private ProductCardSafetyFilter cardSafetyFilter;
     private com.ecommerce.rag.services.recommendation.RecommendationReasonService recommendationReasonService;
     private ChatService chatService;
 
@@ -82,6 +84,7 @@ class ChatServiceContextNoMatchRecoveryTest {
         cartTopUpRecommendationService = mock(CartTopUpRecommendationService.class);
         perfService = mock(PerformanceTraceService.class);
         noMatchRecoveryService = mock(NoMatchRecoveryService.class);
+        cardSafetyFilter = mock(ProductCardSafetyFilter.class);
         recommendationReasonService = mock(com.ecommerce.rag.services.recommendation.RecommendationReasonService.class);
 
         when(appProperties.getChat()).thenReturn(mock(AppProperties.ChatProperties.class));
@@ -97,12 +100,18 @@ class ChatServiceContextNoMatchRecoveryTest {
         doNothing().when(perfService).finishTrace(any());
         doNothing().when(perfService).finishTraceWithError(any(), any());
 
+        when(cardSafetyFilter.filter(any(), any(), any())).thenAnswer(invocation -> {
+            @SuppressWarnings("unchecked")
+            List<ChatCandidate> candidates = invocation.getArgument(0);
+            return new ProductCardSafetyFilter.SafetyFilterResult(candidates, List.of());
+        });
+
         chatService = new ChatService(
                 retriever, promptBuilder, llmClient, appProperties, objectMapper,
                 retrievalRouter, memoryService, queryAnalyzer, pageContextResolver,
                 constraintFilter, productService, countResolver, queryUnderstandingService,
                 cartService, cartTopUpRecommendationService, perfService, noMatchRecoveryService,
-                recommendationReasonService);
+                cardSafetyFilter, recommendationReasonService);
     }
 
     @Test

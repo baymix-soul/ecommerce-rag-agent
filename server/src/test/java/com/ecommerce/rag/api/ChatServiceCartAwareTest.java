@@ -28,6 +28,7 @@ import com.ecommerce.rag.rag.prompt.RagPromptBuilder;
 import com.ecommerce.rag.rag.query.QueryAnalyzer;
 import com.ecommerce.rag.rag.response.RecommendationCountResolver;
 import com.ecommerce.rag.rag.retriever.HybridCandidateRetriever;
+import com.ecommerce.rag.rag.retriever.ProductCardSafetyFilter;
 import com.ecommerce.rag.rag.retriever.StrictProductConstraintFilter;
 import com.ecommerce.rag.rag.router.RetrievalIntent;
 import com.ecommerce.rag.rag.router.RetrievalRouteResult;
@@ -93,6 +94,9 @@ class ChatServiceCartAwareTest {
     @Mock
     private com.ecommerce.rag.services.recommendation.RecommendationReasonService recommendationReasonService;
 
+    @Mock
+    private ProductCardSafetyFilter cardSafetyFilter;
+
     private ChatService chatService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -103,7 +107,8 @@ class ChatServiceCartAwareTest {
                 objectMapper, retrievalRouter, memoryService, queryAnalyzer,
                 pageContextResolver, constraintFilter, productService, countResolver,
                 queryUnderstandingService, cartService, cartTopUpRecommendationService,
-                performanceTraceService, noMatchRecoveryService, recommendationReasonService);
+                performanceTraceService, noMatchRecoveryService, cardSafetyFilter,
+                recommendationReasonService);
 
         // Default: PageContextResolver returns a non-product-detail resolution
         com.ecommerce.rag.rag.context.PageContextResolution defaultResolution =

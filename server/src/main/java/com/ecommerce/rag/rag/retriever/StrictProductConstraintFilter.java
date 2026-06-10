@@ -4,13 +4,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.ecommerce.rag.models.entity.Product;
+import com.ecommerce.rag.rag.brand.BrandAliasService;
 import com.ecommerce.rag.rag.eval.CategoryMatchService;
 import com.ecommerce.rag.rag.query.QueryAnalysisResult;
 
@@ -19,12 +19,13 @@ public class StrictProductConstraintFilter {
 
     private static final Logger log = LoggerFactory.getLogger(StrictProductConstraintFilter.class);
 
-    private static final Set<String> NIKE_ALIASES = Set.of("nike", "耐克");
-
     private final CategoryMatchService categoryMatchService;
+    private final BrandAliasService brandAliasService;
 
-    public StrictProductConstraintFilter(CategoryMatchService categoryMatchService) {
+    public StrictProductConstraintFilter(CategoryMatchService categoryMatchService,
+                                          BrandAliasService brandAliasService) {
         this.categoryMatchService = categoryMatchService;
+        this.brandAliasService = brandAliasService;
     }
 
     public ConstraintCheckResult check(Product product, QueryAnalysisResult analysis) {
@@ -52,9 +53,14 @@ public class StrictProductConstraintFilter {
             List<RetrievedProductCandidate> candidates,
             QueryAnalysisResult analysis) {
 
-        if (analysis == null || !analysis.hasHardConstraints()
+        if (analysis == null) {
+            return candidates;
+        }
+
+        if (!analysis.hasHardConstraints()
                 && (analysis.getNegativeKeywords() == null || analysis.getNegativeKeywords().isEmpty())
-                && (analysis.getAvoidIngredientsOrTerms() == null || analysis.getAvoidIngredientsOrTerms().isEmpty())) {
+                && (analysis.getAvoidIngredientsOrTerms() == null || analysis.getAvoidIngredientsOrTerms().isEmpty())
+                && (analysis.getNegativeBrands() == null || analysis.getNegativeBrands().isEmpty())) {
             return candidates;
         }
 
@@ -175,27 +181,13 @@ public class StrictProductConstraintFilter {
             return ConstraintCheckResult.passed("negativeBrands:no_constraint");
         }
 
-        String brand = product.getBrand();
-        if (brand == null || brand.isBlank()) {
-            return ConstraintCheckResult.passed("negativeBrands:no_product_brand");
-        }
-
-        String lowerBrand = brand.toLowerCase();
-
-        for (String negBrand : negativeBrands) {
-            String lowerNeg = negBrand.toLowerCase();
-
-            if (NIKE_ALIASES.contains(lowerNeg) && NIKE_ALIASES.contains(lowerBrand)) {
-                return ConstraintCheckResult.failed("negative_brand_hit(brand=" + brand
-                                + ", matched=" + negBrand + ")",
-                        ConstraintFailure.of(ConstraintFailure.NEGATIVE_BRAND, "brand", "not " + negBrand, brand));
-            }
-
-            if (lowerBrand.equals(lowerNeg) || lowerBrand.contains(lowerNeg)) {
-                return ConstraintCheckResult.failed("negative_brand_hit(brand=" + brand
-                                + ", matched=" + negBrand + ")",
-                        ConstraintFailure.of(ConstraintFailure.NEGATIVE_BRAND, "brand", "not " + negBrand, brand));
-            }
+        if (brandAliasService.matchesBrandOrAlias(product, negativeBrands)) {
+            String brand = product.getBrand();
+            String displayBrand = (brand != null && !brand.isBlank()) ? brand : product.getName();
+            return ConstraintCheckResult.failed("NEGATIVE_BRAND: brand=" + displayBrand
+                            + ", negative=" + negativeBrands,
+                    ConstraintFailure.of(ConstraintFailure.NEGATIVE_BRAND, "brand/product",
+                            "not " + String.join(",", negativeBrands), displayBrand));
         }
 
         return ConstraintCheckResult.passed("negativeBrands_ok");
@@ -246,6 +238,7 @@ public class StrictProductConstraintFilter {
 
     private String buildProductText(Product product) {
         StringBuilder sb = new StringBuilder();
+        if (product.getBrand() != null) sb.append(product.getBrand()).append(" ");
         if (product.getName() != null) sb.append(product.getName()).append(" ");
         if (product.getDescription() != null) sb.append(product.getDescription()).append(" ");
         if (product.getSpecs() != null) {

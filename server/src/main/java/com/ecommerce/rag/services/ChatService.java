@@ -38,6 +38,7 @@ import com.ecommerce.rag.rag.response.RecommendationCountResolver;
 import com.ecommerce.rag.rag.retriever.HybridCandidateRetriever;
 import com.ecommerce.rag.rag.retriever.NoMatchRecoveryResult;
 import com.ecommerce.rag.rag.retriever.NoMatchRecoveryService;
+import com.ecommerce.rag.rag.retriever.ProductCardSafetyFilter;
 import com.ecommerce.rag.rag.retriever.StrictProductConstraintFilter;
 import com.ecommerce.rag.rag.router.RetrievalIntent;
 import com.ecommerce.rag.rag.router.RetrievalRouteResult;
@@ -77,6 +78,7 @@ public class ChatService {
     private final CartTopUpRecommendationService cartTopUpRecommendationService;
     private final PerformanceTraceService perfService;
     private final NoMatchRecoveryService noMatchRecoveryService;
+    private final ProductCardSafetyFilter cardSafetyFilter;
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
     public ChatService(HybridCandidateRetriever retriever,
@@ -96,6 +98,7 @@ public class ChatService {
                        CartTopUpRecommendationService cartTopUpRecommendationService,
                        PerformanceTraceService perfService,
                        NoMatchRecoveryService noMatchRecoveryService,
+                       ProductCardSafetyFilter cardSafetyFilter,
                        RecommendationReasonService reasonService) {
         this.retriever = retriever;
         this.promptBuilder = promptBuilder;
@@ -114,6 +117,7 @@ public class ChatService {
         this.cartTopUpRecommendationService = cartTopUpRecommendationService;
         this.perfService = perfService;
         this.noMatchRecoveryService = noMatchRecoveryService;
+        this.cardSafetyFilter = cardSafetyFilter;
         this.reasonService = reasonService;
     }
 
@@ -266,41 +270,35 @@ public class ChatService {
         List<ChatCandidate> retrievedCandidates = retriever.retrieveWithAnalysis(message, limit, analysis);
         PerfTraceContext.endSpan("retrieval.total");
 
-        List<ChatCandidate> finalCandidates = new ArrayList<>();
+        List<ChatCandidate> constraintFilteredCandidates = new ArrayList<>();
         for (ChatCandidate c : retrievedCandidates) {
             if (c.getProductId() == null) {
-                finalCandidates.add(c);
                 continue;
             }
 
             var fullProduct = productService.findById(c.getProductId());
             if (fullProduct.isPresent() && constraintFilter.passes(fullProduct.get(), analysis)) {
-                finalCandidates.add(c);
+                constraintFilteredCandidates.add(c);
             } else {
                 log.warn("product_card secondary check failed: productId={}, name={}, price={}",
                         c.getProductId(), c.getName(), c.getPrice());
             }
         }
 
-        if (retrievedCandidates.size() != finalCandidates.size()) {
+        if (retrievedCandidates.size() != constraintFilteredCandidates.size()) {
             log.warn("Secondary constraint filter removed {} candidates: {} -> {}",
-                    retrievedCandidates.size() - finalCandidates.size(),
-                    retrievedCandidates.size(), finalCandidates.size());
+                    retrievedCandidates.size() - constraintFilteredCandidates.size(),
+                    retrievedCandidates.size(), constraintFilteredCandidates.size());
         }
 
         List<ChatCandidate> displayCandidates;
         String recoveryMessage = null;
         boolean recoveryApplied = false;
+        com.ecommerce.rag.rag.memory.ActiveSearchContext activeContext = understanding.getActiveSearchContext();
 
-        if (finalCandidates.isEmpty()) {
-            // NoMatch Recovery v2
+        if (constraintFilteredCandidates.isEmpty()) {
             PerfTraceContext.startSpan("retrieval.no_match_recovery");
-            var understandingResult = queryUnderstandingService.understandForRetrieval(
-                    message, sessionId, request.getPageContext());
-            var activeContext = understandingResult.getActiveSearchContext();
-
             if (activeContext != null && noMatchRecoveryService != null) {
-                // Build raw candidates from retriever internal result if possible; fallback to retrievedCandidates
                 List<com.ecommerce.rag.rag.retriever.RetrievedProductCandidate> rawCandidates =
                         retriever.getLastRetrievedCandidates();
 
@@ -321,7 +319,6 @@ public class ChatService {
                     log.info("NoMatchRecovery: not recovered, message={}", recoveryMessage);
                 }
 
-                // Update memory: NO_MATCH does NOT clear active context
                 memoryService.updateAfterNoMatch(sessionId, analysis, recovery.isRecovered());
             } else {
                 displayCandidates = List.of();
@@ -330,10 +327,29 @@ public class ChatService {
             }
             PerfTraceContext.endSpan("retrieval.no_match_recovery");
         } else {
-            displayCandidates = finalCandidates.stream()
+            displayCandidates = constraintFilteredCandidates.stream()
                     .limit(displayLimit)
                     .toList();
-            memoryService.updateAfterRetrieval(sessionId, message, analysis, displayCandidates);
+        }
+
+        List<ChatCandidate> finalSafeDisplayCandidates;
+        if (!displayCandidates.isEmpty() && cardSafetyFilter != null) {
+            var safetyResult = cardSafetyFilter.filter(displayCandidates, analysis, activeContext);
+            finalSafeDisplayCandidates = safetyResult.getSafeCandidates();
+        } else {
+            finalSafeDisplayCandidates = displayCandidates;
+        }
+
+        if (!recoveryApplied && !finalSafeDisplayCandidates.isEmpty()) {
+            memoryService.updateAfterRetrieval(sessionId, message, analysis, finalSafeDisplayCandidates);
+        }
+
+        if (finalSafeDisplayCandidates.isEmpty() && !displayCandidates.isEmpty()) {
+            log.info("ProductCardSafetyFilter removed all displayCandidates, switching to NO_MATCH");
+            analysis.setResponseStyle(QueryAnalysisResult.NO_MATCH);
+            if (!recoveryApplied) {
+                memoryService.updateAfterNoMatch(sessionId, analysis, false);
+            }
         }
 
         boolean skipProductCards = pageContext.isProductDetail()
@@ -345,11 +361,12 @@ public class ChatService {
         String responseStyle = analysis.getResponseStyle();
 
         PerfTraceContext.startSpan("prompt.build");
-        String prompt = promptBuilder.build(message, displayCandidates, pageContext, responseStyle);
+        String prompt = promptBuilder.build(message, finalSafeDisplayCandidates, pageContext, responseStyle);
         PerfTraceContext.endSpan("prompt.build");
 
-        log.info("Chat retrieval: displayLimit={}, finalCandidates={}, displayCandidates={}, style={}, skipCards={}, recoveryApplied={}",
-                displayLimit, finalCandidates.size(), displayCandidates.size(), responseStyle, skipProductCards, recoveryApplied);
+        log.info("Chat retrieval: displayLimit={}, constraintFilteredCandidates={}, displayCandidates={}, finalSafeDisplayCandidates={}, style={}, skipCards={}, recoveryApplied={}",
+                displayLimit, constraintFilteredCandidates.size(), displayCandidates.size(),
+                finalSafeDisplayCandidates.size(), responseStyle, skipProductCards, recoveryApplied);
 
         SseEmitter emitter = new SseEmitter(60_000L);
 
@@ -375,7 +392,7 @@ public class ChatService {
                         () -> {
                             PerfTraceContext.mark("sse.send_done");
                             if (!skipProductCards) {
-                                sendProductCards(emitter, displayCandidates, analysis);
+                                sendProductCards(emitter, finalSafeDisplayCandidates, analysis);
                             }
                             sendSseEvent(emitter, "done", Collections.emptyMap());
                             emitter.complete();

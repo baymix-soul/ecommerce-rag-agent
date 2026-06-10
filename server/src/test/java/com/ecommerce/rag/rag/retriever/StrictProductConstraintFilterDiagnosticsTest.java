@@ -10,21 +10,24 @@ import org.junit.jupiter.api.Test;
 import static org.mockito.Mockito.*;
 
 import com.ecommerce.rag.models.entity.Product;
+import com.ecommerce.rag.rag.brand.BrandAliasService;
 import com.ecommerce.rag.rag.eval.CategoryMatchService;
 import com.ecommerce.rag.rag.query.QueryAnalysisResult;
 
 class StrictProductConstraintFilterDiagnosticsTest {
 
     private CategoryMatchService categoryMatchService;
+    private BrandAliasService brandAliasService;
     private StrictProductConstraintFilter filter;
 
     @BeforeEach
     void setUp() {
         categoryMatchService = mock(CategoryMatchService.class);
+        brandAliasService = new BrandAliasService();
         when(categoryMatchService.categoryMatches(any(), any())).thenReturn(false);
         when(categoryMatchService.subCategoryMatches(any(), any())).thenReturn(false);
         when(categoryMatchService.subCategoryMatchesAny(any(), any())).thenReturn(false);
-        filter = new StrictProductConstraintFilter(categoryMatchService);
+        filter = new StrictProductConstraintFilter(categoryMatchService, brandAliasService);
     }
 
     @Test
@@ -88,7 +91,7 @@ class StrictProductConstraintFilterDiagnosticsTest {
         ConstraintCheckResult result = filter.check(p, analysis);
 
         assertFalse(result.isPassed());
-        assertTrue(result.getFailedRules().stream().anyMatch(r -> r.contains("negative_brand_hit")));
+        assertTrue(result.getFailedRules().stream().anyMatch(r -> r.startsWith("NEGATIVE_BRAND")));
         assertTrue(result.getFailures().stream().anyMatch(f -> ConstraintFailure.NEGATIVE_BRAND.equals(f.getType())));
     }
 

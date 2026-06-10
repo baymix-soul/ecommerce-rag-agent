@@ -9,13 +9,16 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import com.ecommerce.rag.models.entity.Product;
+import com.ecommerce.rag.rag.brand.BrandAliasService;
 import com.ecommerce.rag.rag.eval.CategoryMatchService;
 import com.ecommerce.rag.rag.query.QueryAnalysisResult;
 
 class StrictProductConstraintFilterTest {
 
     private final CategoryMatchService categoryMatchService = new CategoryMatchService();
-    private final StrictProductConstraintFilter filter = new StrictProductConstraintFilter(categoryMatchService);
+    private final BrandAliasService brandAliasService = new BrandAliasService();
+    private final StrictProductConstraintFilter filter = new StrictProductConstraintFilter(
+            categoryMatchService, brandAliasService);
 
     private Product makeProduct(String id, String category, String subCategory,
                                  BigDecimal price, String brand, String name, String description) {

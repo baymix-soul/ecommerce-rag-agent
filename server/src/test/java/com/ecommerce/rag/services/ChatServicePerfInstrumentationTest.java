@@ -34,6 +34,7 @@ import com.ecommerce.rag.rag.query.QueryAnalysisResult;
 import com.ecommerce.rag.rag.query.QueryAnalyzer;
 import com.ecommerce.rag.rag.response.RecommendationCountResolver;
 import com.ecommerce.rag.rag.retriever.HybridCandidateRetriever;
+import com.ecommerce.rag.rag.retriever.ProductCardSafetyFilter;
 import com.ecommerce.rag.rag.retriever.StrictProductConstraintFilter;
 import com.ecommerce.rag.rag.router.RetrievalIntent;
 import com.ecommerce.rag.rag.router.RetrievalRouteResult;
@@ -61,6 +62,7 @@ class ChatServicePerfInstrumentationTest {
     @Mock CartService cartService;
     @Mock CartTopUpRecommendationService cartTopUpRecommendationService;
     @Mock com.ecommerce.rag.rag.retriever.NoMatchRecoveryService noMatchRecoveryService;
+    @Mock ProductCardSafetyFilter cardSafetyFilter;
     @Mock com.ecommerce.rag.services.recommendation.RecommendationReasonService recommendationReasonService;
 
     ChatService chatService;
@@ -95,7 +97,7 @@ class ChatServicePerfInstrumentationTest {
                 new ObjectMapper(), retrievalRouter, memoryService, queryAnalyzer,
                 pageContextResolver, constraintFilter, productService, countResolver,
                 queryUnderstandingService, cartService, cartTopUpRecommendationService,
-                perfService, noMatchRecoveryService, recommendationReasonService);
+                perfService, noMatchRecoveryService, cardSafetyFilter, recommendationReasonService);
     }
 
     @Test
