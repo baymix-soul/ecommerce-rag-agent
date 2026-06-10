@@ -42,12 +42,12 @@
 
 ```bash
 # 1. 克隆项目
-git clone <REPO_URL>
+git clone https://github.com/baymix-soul/ecommerce-rag-agent.git
 cd ecommerce-rag-agent
 
 # 2. 配置环境变量
 cp deploy/.env.demo.example deploy/.env
-# 编辑 deploy/.env，填入 DOUBAO_API_KEY（必须）
+# 编辑 deploy/.env，填入 LLM_API_KEY（必须),EMBEDDINGKEY(维度需要与Qdrant维度相同)。
 
 # 3. 启动后端
 cd deploy
